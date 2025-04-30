@@ -4,21 +4,21 @@ if __name__ == '__main__':
     default_time = 5
     normal = ("normal", 0.01)
 
-    scenarios = [
-        [],         # 0
-        [normal],   # 1
+    scenarios = {
+        "": [],
+        "normal": [normal],
 
-        [("simple_dos", default_time)],                     # 2
-        [normal, ("simple_dos", default_time), normal],     # 3
+        "dos1": [("simple_dos", default_time)],
+        "dos2": [normal, ("simple_dos", default_time), normal],
 
-        [("ddos", default_time)],                           # 4
-        [normal, ("ddos", default_time), normal],           # 5
+        "ddos1": [("ddos", default_time)],
+        "ddos2": [normal, ("ddos", default_time), normal],
 
-        [("reflected_dos", 20)],                            # 6
-        [normal, ("reflected_dos", default_time), normal],  # 7
+        "rdos1": [("reflected_dos", 20)],
+        "rdos2": [normal, ("reflected_dos", default_time), normal],
 
-        [("port_scan", default_time)],                      # 8
-        [normal, ("port_scan", default_time), normal],      # 9
-    ]
+        "pscan1": [("port_scan", default_time)],
+        "pscan2": [normal, ("port_scan", default_time), normal],
+    }
 
-    generate_traffic(scenarios[8])
+    generate_traffic(scenarios["dos1"])
