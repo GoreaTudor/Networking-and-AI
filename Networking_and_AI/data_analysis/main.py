@@ -1,39 +1,9 @@
-import pandas as pd
-from scapy.all import rdpcap
-
-from data_analysis.constants import get_protocol
-
-FILE_NAME = "..\\data\\test_dos2.pcap"
+from data_analysis.data_loader import load_packets_supervised_data
 
 if __name__ == '__main__':
-    packets = rdpcap(FILE_NAME)
+    df = load_packets_supervised_data(debug_mode=True)
 
-    data = []
-    start_time = packets[0].time if len(packets) > 0 else 0
-
-    for pkt in packets:
-        entry = {
-            "time": pkt.time - start_time,
-            "size": len(pkt),
-        }
-
-        if pkt.haslayer("IP"):
-            entry["protocol"] = get_protocol(pkt["IP"].proto)
-            entry["src_IP"] = pkt["IP"].src
-            entry["dst_IP"] = pkt["IP"].dst
-
-        elif pkt.haslayer("TCP"):
-            entry["protocol"] = get_protocol(pkt["TCP"].proto)
-            entry["src_port"] = pkt["TCP"].sport
-            entry["dst_port"] = pkt["TCP"].dport
-            entry["flags"] = pkt["TCP"].flags
-
-        elif pkt.haslayer("UDP"):
-            entry["protocol"] = get_protocol(pkt["UDP"].proto)
-            entry["src_port"] = pkt["UDP"].sport
-            entry["dst_port"] = pkt["UDP"].dport
-
-        data.append(entry)
-
-    df = pd.DataFrame(data)
-    print(df)
+    # checks if the labels are added correctly
+    # there also seems to be a delay issue with the timing generated in csv
+    for i in range(0, 1100, 10):
+        print(f"\n{i}: {df.iloc[i].attack_type}")
