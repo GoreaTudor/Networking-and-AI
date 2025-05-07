@@ -63,3 +63,12 @@ def load_packets_supervised_data(pcap_file_path=__PCAP_FILE_PATH,
         print(df)
 
     return df
+
+
+if __name__ == '__main__':
+    df = load_packets_supervised_data(debug_mode=True)
+
+    # checks if the labels are added correctly
+    # there also seems to be a delay issue with the timing generated in csv
+    for i in range(0, 1100, 100):
+        print(f"\n{i}: {df.iloc[i].attack_type}")
