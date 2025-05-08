@@ -8,6 +8,7 @@ $ pip install pandas
 $ pip install scapy
 $ pip install scikit-learn
 $ pip install matplotlib
+$ pip install tensorflow
 ```
 
 Note that I didn't use `$ conda install ...` and used
