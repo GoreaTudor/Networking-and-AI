@@ -56,24 +56,43 @@ def normal_traffic(victim, client, duration):
     time.sleep(duration + 1)
 
 
-def simple_dos(victim, attacker, duration):
-    print("\n[*] Starting simple DoS (ping flood)...")
-    cmd = "ping -f -c " + str(duration * 10) + " " + victim.IP() + " &"
+def __get_dos_cmd(victim, duration, method):
+    if method == "ping":
+        return "ping -f -c " + str(duration * 10) + " " + victim.IP() + " &"
+    elif method == "syn":
+        return "hping3 -S --flood -p 80 " + str(victim.IP()) + " &"
+    elif method == "udp":
+        return "hping3 --udp --flood -p 123 " + str(victim.IP()) + " &"
+    else:
+        print("[!] Unknown DoS method: " + method)
+        return None
+
+
+def simple_dos(victim, attacker, duration, method):
+    print("\n[*] Starting simple DoS (" + method + " flood)...")
+    cmd = __get_dos_cmd(victim, duration, method)
+    if cmd is None:
+        return
+
     print("-- Attacker: " + cmd)
     attacker.cmd(cmd)
     time.sleep(duration)
 
 
-def ddos(victim, attackers, duration):
+def ddos(victim, attackers, duration, method, split=5):
     print("\n[*] Starting DDoS (multi-host ping flood)...")
-    for attacker in attackers:
-        cmd = "ping -f -c " + str(duration * 10) + " " + victim.IP() + " &"
-        print("-- Attacker " + attacker.name + ": " + cmd)
-        attacker.cmd(cmd)
+    cmd = __get_dos_cmd(victim, duration / 5, method)
+    if cmd is None:
+        return
+
+    for _ in range(split):
+        for attacker in attackers:
+            print("-- Attacker " + attacker.name + ": " + cmd)
+            attacker.cmd(cmd)
     time.sleep(duration)
 
 
-# DOES NOT WORK
+# todo: repair this to run as long as I want it
 def reflected_dos(victim, attacker, dns_server, duration):
     print("\n[*] Starting reflected DoS using spoofed DNS requests...")
     # dns_cmd = "dnsmasq --no-daemon --log-queries --log-facility=- &"
@@ -83,19 +102,20 @@ def reflected_dos(victim, attacker, dns_server, duration):
     dns_server.cmd("nohup python3 -m http.server 53 >/dev/null 2>&1 &")  # dummy server using port 53
 
     # Use scapy or hping3 to send spoofed UDP packets to port 53
-    cmd = "hping3 --udp -a " + victim.IP() + " -p 53 -i u10000 " + dns_server.IP() + " &"
+    cmd = "hping3 --udp -a " + victim.IP() + " -p 53 -i u1000 " + dns_server.IP() + " &"
     print("-- Attacker: " + cmd)
     attacker.cmd(cmd)
     time.sleep(duration)
 
 
-# DOES NOT WORK
+# DOES NOT WORK (with nmap installed), maybe try hping3
 def port_scan(victim, attacker, duration):
     print("\n[*] Starting port scan...")
     victim.cmd("nohup nc -lkp 80 >/dev/null 2>&1 &")
     victim.cmd("nohup nc -lkp 443 >/dev/null 2>&1 &")
 
-    cmd = "nmap -sS -p 80,443 " + victim.IP() + " &"
+    cmd = "nmap -sT -p 80,443 " + victim.IP() + " &"
+    # cmd = "hping3 -S -p 80 -i u10000 " + victim.IP() + " &"
     print("-- Attacker: " + cmd)
     attacker.cmd(cmd)
     time.sleep(duration)
@@ -132,12 +152,30 @@ def generate_traffic(scenario, pcap_file=PCAP_FILE_NAME, debug_mode=False):
         if attack_type == "normal":
             normal_traffic(victim=h1, client=h2, duration=duration)
             attackers = "h2"
-        elif attack_type == "simple_dos":
-            simple_dos(victim=h1, attacker=a1, duration=duration)
+
+        # Simple DOS
+        elif attack_type == "ping_flood":
+            simple_dos(victim=h1, attacker=a1, duration=duration, method="ping")
             attackers = "a1"
-        elif attack_type == "ddos":
-            ddos(victim=h1, attackers=[a1, a2, a3], duration=duration)
+        elif attack_type == "syn_flood":
+            simple_dos(victim=h1, attacker=a1, duration=duration, method="syn")
+            attackers = "a1"
+        elif attack_type == "udp_flood":
+            simple_dos(victim=h1, attacker=a1, duration=duration, method="udp")
+            attackers = "a1"
+
+        # D-DOS
+        elif attack_type == "ping_ddos":
+            ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="ping")
             attackers = "a1,a2,a3"
+        elif attack_type == "syn_ddos":
+            ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="syn")
+            attackers = "a1,a2,a3"
+        elif attack_type == "udp_ddos":
+            ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="udp")
+            attackers = "a1,a2,a3"
+
+        # Other
         elif attack_type == "port_scan":
             port_scan(victim=h1, attacker=a1, duration=duration)
             attackers = "a1"
