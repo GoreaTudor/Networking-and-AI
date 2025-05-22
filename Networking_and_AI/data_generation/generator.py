@@ -24,7 +24,7 @@ def write_metadata(filename=METADATA_FILE_NAME):
     import csv
     with open(filename, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["attack_type", "start_time", "end_time", "attacker", "victim"])
+        writer.writerow(["attack_type", "start_time", "end_time"])
         writer.writerows(metadata)
     print("Metadata written to " + filename)
 
@@ -60,9 +60,9 @@ def __get_dos_cmd(victim, duration, method):
     if method == "ping":
         return "ping -f -c " + str(duration * 10) + " " + victim.IP() + " &"
     elif method == "syn":
-        return "hping3 -S --flood -p 80 " + str(victim.IP()) + " &"
+        return "hping3 -S -p 80 -i u1000 " + str(victim.IP()) + " &"
     elif method == "udp":
-        return "hping3 --udp --flood -p 123 " + str(victim.IP()) + " &"
+        return "hping3 --udp -p 123 -i u1000 " + str(victim.IP()) + " &"
     else:
         print("[!] Unknown DoS method: " + method)
         return None
@@ -151,43 +151,34 @@ def generate_traffic(scenario, pcap_file=PCAP_FILE_NAME, debug_mode=False):
 
         if attack_type == "normal":
             normal_traffic(victim=h1, client=h2, duration=duration)
-            attackers = "h2"
 
         # Simple DOS
         elif attack_type == "ping_flood":
             simple_dos(victim=h1, attacker=a1, duration=duration, method="ping")
-            attackers = "a1"
         elif attack_type == "syn_flood":
             simple_dos(victim=h1, attacker=a1, duration=duration, method="syn")
-            attackers = "a1"
         elif attack_type == "udp_flood":
             simple_dos(victim=h1, attacker=a1, duration=duration, method="udp")
-            attackers = "a1"
 
         # D-DOS
         elif attack_type == "ping_ddos":
             ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="ping")
-            attackers = "a1,a2,a3"
         elif attack_type == "syn_ddos":
             ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="syn")
-            attackers = "a1,a2,a3"
         elif attack_type == "udp_ddos":
             ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="udp")
-            attackers = "a1,a2,a3"
 
         # Other
         elif attack_type == "port_scan":
             port_scan(victim=h1, attacker=a1, duration=duration)
-            attackers = "a1"
         elif attack_type == "reflected_dos":
             reflected_dos(victim=h1, attacker=a1, dns_server=dns, duration=duration)
-            attackers = "a1"
         else:
             print("[!] Unknown attack type: " + attack_type)
             continue
 
         end = time.time() - attack_start
-        metadata.append([attack_type, round(start, 2), round(end, 2), attackers, "h1"])
+        metadata.append([attack_type, round(start, 2), round(end, 2)])
 
     print("\n[*] Stopping tcpdump...")
     h1.cmd("pkill tcpdump")
