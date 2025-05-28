@@ -1,16 +1,20 @@
 from pandas import DataFrame
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 
+from data_analysis.utils import RANDOM_STATE
 from data_loader import load_packets_supervised_data
 from graphs import draw_confusion_matrix
 
+__N_ESTIMATORS = 100
+__TEST_SIZE = 0.2
+
 
 def run_random_forest(df: DataFrame,
-                      test_size=0.2,
-                      random_state=42):
+                      test_size: float = __TEST_SIZE,
+                      random_state: int = RANDOM_STATE):
     print("Random Forest Classifier")
 
     # drop unknown rows
