@@ -6,6 +6,9 @@ __CONVERTED_FILE_PREFIX = "..\\data\\converted\\"
 __MERGED_FILE_PREFIX = "..\\data\\merged\\"
 __UNKNOWN_LABEL = "unknown"
 
+__DEFAULT_TRAIN_FILE_NAME = "all_floods"
+__DEFAULT_TEST_FILE_NAME = "all_floods"
+
 
 def load_packets_supervised_data(file_name: str = __DEFAULT_FILE_NAME,
                                  from_merged: bool = True) -> DataFrame:
@@ -18,6 +21,16 @@ def load_packets_supervised_data(file_name: str = __DEFAULT_FILE_NAME,
     df_cleaned = df[df["attack_type"] != __UNKNOWN_LABEL].reset_index(drop=True)
 
     return df_cleaned
+
+
+def load_training_supervised_data(file_name: str = __DEFAULT_TRAIN_FILE_NAME,
+                                  from_merged: bool = True) -> DataFrame:
+    return load_packets_supervised_data(file_name, from_merged)
+
+
+def load_testing_supervised_data(file_name: str = __DEFAULT_TEST_FILE_NAME,
+                                 from_merged: bool = True) -> DataFrame:
+    return load_packets_supervised_data(file_name, from_merged)
 
 
 if __name__ == '__main__':

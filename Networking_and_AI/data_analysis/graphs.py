@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from pandas import DataFrame
 from sklearn.metrics import confusion_matrix
 
@@ -42,16 +43,16 @@ def draw_packet_size_distribution_by_attack_type(df: DataFrame):
 
 
 ##### PREDICTION GRAPHS #####
-def draw_confusion_matrix(test_y, pred_y, labels):
-    cm = confusion_matrix(test_y, pred_y, labels=labels)
+def draw_confusion_matrix(test_y, pred_y, label_names):
+    cm = confusion_matrix(test_y, pred_y, labels=label_names)
 
     plt.figure(figsize=(8, 6))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
     plt.title('Confusion Matrix')
     plt.colorbar()
-    tick_marks = range(len(labels))
-    plt.xticks(tick_marks, labels, rotation=45)
-    plt.yticks(tick_marks, labels)
+    tick_marks = np.arange(len(label_names))
+    plt.xticks(tick_marks, label_names, rotation=45)
+    plt.yticks(tick_marks, label_names)
 
     # Annotate numbers inside squares
     thresh = cm.max() / 2.
@@ -65,4 +66,3 @@ def draw_confusion_matrix(test_y, pred_y, labels):
     plt.xlabel('Predicted Label')
     plt.tight_layout()
     plt.show()
-
