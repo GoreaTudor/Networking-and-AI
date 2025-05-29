@@ -4,16 +4,16 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from data_analysis.utils import RANDOM_STATE
+from data_analysis.utils import N_ESTIMATORS, RANDOM_STATE
 from data_loader import load_packets_supervised_data
 from graphs import draw_confusion_matrix
 
-__N_ESTIMATORS = 100
 __TEST_SIZE = 0.2
 
 
 def run_random_forest(df: DataFrame,
                       test_size: float = __TEST_SIZE,
+                      n_estimators: int = N_ESTIMATORS,
                       random_state: int = RANDOM_STATE):
     print("Random Forest Classifier")
 
@@ -34,7 +34,7 @@ def run_random_forest(df: DataFrame,
                                                         stratify=y)
 
     # train
-    clf = RandomForestClassifier(n_estimators=100, random_state=random_state)
+    clf = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
     clf.fit(train_x, train_y)
 
     # test

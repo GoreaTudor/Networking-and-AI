@@ -10,17 +10,13 @@ from sklearn.preprocessing import LabelEncoder
 
 from data_analysis.data_loader import load_packets_supervised_data
 from data_analysis.graphs import draw_confusion_matrix
-from data_analysis.utils import create_sequences
-
-__SEQ_LEN = 10
-__N_EPOCHS = 10
-__LR = 0.001
+from data_analysis.utils import create_sequences, SEQ_LENGTH, N_EPOCHS, LR
 
 
 def run_lstm(df: DataFrame,
-             seq_len: int = __SEQ_LEN,
-             n_epochs: int = __N_EPOCHS,
-             lr: float = __LR):
+             seq_len: int = SEQ_LENGTH,
+             n_epochs: int = N_EPOCHS,
+             lr: float = LR):
     # filter and encode
     df = df[df['attack_type'] != 'unknown']
 

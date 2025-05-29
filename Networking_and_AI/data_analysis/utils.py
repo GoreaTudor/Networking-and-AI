@@ -1,7 +1,10 @@
 import numpy as np
 
 RANDOM_STATE = 42
-
+N_ESTIMATORS = 100
+SEQ_LENGTH = 10
+N_EPOCHS = 10
+LR = 0.001
 
 def create_sequences(x, y, seq_length):
     xs, ys = [], []
