@@ -9,8 +9,7 @@ from data_analysis.graphs import draw_confusion_matrix
 
 
 def run_knn(train_df: DataFrame,
-            test_df: DataFrame,
-            n_neighbors: int = 5):
+            test_df: DataFrame):
     # filter unknowns
     train_df = train_df[train_df["attack_type"] != "unknown"]
     test_df = test_df[test_df["attack_type"] != "unknown"]
@@ -20,7 +19,7 @@ def run_knn(train_df: DataFrame,
     train_df["protocol_encoded"] = le_protocol.fit_transform(train_df["protocol"])
     test_df["protocol_encoded"] = le_protocol.transform(test_df["protocol"])
 
-    # encode labels
+    # encode attack types
     le_attack = LabelEncoder()
     train_df["attack_type_encoded"] = le_attack.fit_transform(train_df["attack_type"])
 
@@ -30,12 +29,16 @@ def run_knn(train_df: DataFrame,
 
     test_df["attack_type_encoded"] = le_attack.transform(test_df["attack_type"])
 
-    # prepare data
+    # prepare input data
     features = ["size", "protocol_encoded"]
     train_x = train_df[features]
     test_x = test_df[features]
     train_y = train_df["attack_type_encoded"]
     test_y = test_df["attack_type_encoded"]
+
+    # dynamic neighbor count based on number of classes
+    n_neighbors = len(test_y.unique())
+    print(f"Dynamic n_neighbors set to: {n_neighbors}")
 
     # train
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
@@ -44,11 +47,12 @@ def run_knn(train_df: DataFrame,
     # predict
     pred_y = model.predict(test_x)
 
-    # convert back to strings for reporting
+    # inverse transform
     test_labels_str = le_attack.inverse_transform(test_y)
     pred_labels_str = le_attack.inverse_transform(pred_y)
     labels_in_test = le_attack.inverse_transform(sorted(test_y.unique()))
 
+    # report
     print(classification_report(
         test_labels_str,
         pred_labels_str,
