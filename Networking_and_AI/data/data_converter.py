@@ -85,6 +85,54 @@ def transform_single_attacks_to_csv(file_name: str,
         writer.writerows(data)
 
 
+def convert_all_files():
+    all_files = [
+        ("normal_0", "unknown"),
+        ("normal_1", "unknown"),
+
+        # floods
+        ("ping_flood_0", "ping_flood"), # ping
+        ("ping_flood_1", "ping_flood"),
+        ("syn_flood_0", "syn_flood"), # syn
+        ("syn_flood_1", "syn_flood"),
+        ("fin_flood_0", "fin_flood"), # fin
+        ("fin_flood_1", "fin_flood"),
+        ("rst_flood_0", "rst_flood"), # rst
+        ("rst_flood_1", "rst_flood"),
+        ("udp_flood_0", "udp_flood"), # udp
+        ("udp_flood_1", "udp_flood"),
+
+        # ddos
+        ("ping_ddos_0", "ping_ddos"), # ping
+        ("ping_ddos_1", "ping_ddos"),
+        ("syn_ddos_0", "syn_ddos"), # syn
+        ("syn_ddos_1", "syn_ddos"),
+        ("fin_ddos_0", "fin_ddos"), # fin
+        ("fin_ddos_1", "fin_ddos"),
+        ("rst_ddos_0", "rst_ddos"), # rst
+        ("rst_ddos_1", "rst_ddos"),
+        ("udp_ddos_0", "udp_ddos"), # udp
+        ("udp_ddos_1", "udp_ddos"),
+
+        # other
+        ("reflected_dos_0", "reflected_dos"),  # reflected dos
+        ("reflected_dos_1", "reflected_dos"),
+        ("pscan_test", "port_scan"),  # pscan
+        ("pscan_0", "port_scan"),
+        ("pscan_1", "port_scan"),
+    ]
+
+    for file_name, attack_label in all_files:
+        print(">> " + file_name)
+        transform_single_attacks_to_csv(file_name=file_name,
+                                        attack_label=attack_label)
+
+
+
 if __name__ == '__main__':
-    transform_single_attacks_to_csv(file_name="udp_ddos_2",
-                                    attack_label="udp_ddos")
+    ### do all files:
+    convert_all_files()
+
+    ### specific file:
+    # transform_single_attacks_to_csv(file_name="udp_ddos_0",
+    #                                 attack_label="udp_ddos")

