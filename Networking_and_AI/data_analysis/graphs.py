@@ -66,3 +66,18 @@ def draw_confusion_matrix(test_y, pred_y, label_names):
     plt.xlabel('Predicted Label')
     plt.tight_layout()
     plt.show()
+
+
+def draw_weights_graph(all_weights, averaged_weights):
+    plt.figure(figsize=(12, 6))
+    for i, weights in enumerate(all_weights):
+        flattened_weights = np.concatenate([w.flatten() for w in weights])
+        plt.plot(range(len(flattened_weights)), flattened_weights, label=f"Model {i + 1}")
+    aggregated_flattened_weights = np.concatenate([w.flatten() for w in averaged_weights])
+    plt.plot(range(len(aggregated_flattened_weights)), aggregated_flattened_weights, label="Aggregated Model",
+             linestyle="-", color="black")
+    plt.title("Model Weights Visualization")
+    plt.xlabel("Weight Index")
+    plt.ylabel("Weight Value")
+    plt.legend()
+    plt.show()

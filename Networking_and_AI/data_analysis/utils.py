@@ -5,6 +5,8 @@ N_ESTIMATORS = 100
 SEQ_LENGTH = 10
 N_EPOCHS = 10
 LR = 0.001
+INPUTS = ['size', 'protocol_encoded', 'src_port', 'dst_port', 'flags']
+INPUTS_SMALL = ['size', 'protocol_encoded']
 
 def create_sequences(x, y, seq_length):
     xs, ys = [], []
