@@ -1,5 +1,7 @@
 import csv
+
 from scapy.all import rdpcap
+from scapy.layers.inet import IP, TCP, UDP
 
 __RAW_FILE_PREFIX = ".\\raw\\"
 __CONVERTED_FILE_PREFIX = ".\\converted\\"
@@ -58,21 +60,19 @@ def transform_single_attacks_to_csv(file_name: str,
             "flags": "",
         }
 
-        if pkt.haslayer("IP"):
-            entry["protocol"] = get_protocol(pkt["IP"].proto)
-            entry["src_IP"] = pkt["IP"].src
-            entry["dst_IP"] = pkt["IP"].dst
+        if IP in pkt:
+            entry["src_IP"] = pkt[IP].src
+            entry["dst_IP"] = pkt[IP].dst
+            entry["protocol"] = get_protocol(pkt[IP].proto)
 
-        elif pkt.haslayer("TCP"):
-            entry["protocol"] = get_protocol(pkt["TCP"].proto)
-            entry["src_port"] = pkt["TCP"].sport
-            entry["dst_port"] = pkt["TCP"].dport
-            entry["flags"] = pkt["TCP"].flags
+            if TCP in pkt:
+                entry["src_port"] = pkt[TCP].sport
+                entry["dst_port"] = pkt[TCP].dport
+                entry["flags"] = pkt[TCP].flags
 
-        elif pkt.haslayer("UDP"):
-            entry["protocol"] = get_protocol(pkt["UDP"].proto)
-            entry["src_port"] = pkt["UDP"].sport
-            entry["dst_port"] = pkt["UDP"].dport
+            elif UDP in pkt:
+                entry["src_port"] = pkt[UDP].sport
+                entry["dst_port"] = pkt[UDP].dport
 
         entry["attack_type"] = get_attack_label(entry["src_IP"], entry["dst_IP"], attack_label)
         data.append(entry)
@@ -91,27 +91,27 @@ def convert_all_files():
         ("normal_1", "unknown"),
 
         # floods
-        ("ping_flood_0", "ping_flood"), # ping
+        ("ping_flood_0", "ping_flood"),  # ping
         ("ping_flood_1", "ping_flood"),
-        ("syn_flood_0", "syn_flood"), # syn
+        ("syn_flood_0", "syn_flood"),  # syn
         ("syn_flood_1", "syn_flood"),
-        ("fin_flood_0", "fin_flood"), # fin
+        ("fin_flood_0", "fin_flood"),  # fin
         ("fin_flood_1", "fin_flood"),
-        ("rst_flood_0", "rst_flood"), # rst
+        ("rst_flood_0", "rst_flood"),  # rst
         ("rst_flood_1", "rst_flood"),
-        ("udp_flood_0", "udp_flood"), # udp
+        ("udp_flood_0", "udp_flood"),  # udp
         ("udp_flood_1", "udp_flood"),
 
         # ddos
-        ("ping_ddos_0", "ping_ddos"), # ping
+        ("ping_ddos_0", "ping_ddos"),  # ping
         ("ping_ddos_1", "ping_ddos"),
-        ("syn_ddos_0", "syn_ddos"), # syn
+        ("syn_ddos_0", "syn_ddos"),  # syn
         ("syn_ddos_1", "syn_ddos"),
-        ("fin_ddos_0", "fin_ddos"), # fin
+        ("fin_ddos_0", "fin_ddos"),  # fin
         ("fin_ddos_1", "fin_ddos"),
-        ("rst_ddos_0", "rst_ddos"), # rst
+        ("rst_ddos_0", "rst_ddos"),  # rst
         ("rst_ddos_1", "rst_ddos"),
-        ("udp_ddos_0", "udp_ddos"), # udp
+        ("udp_ddos_0", "udp_ddos"),  # udp
         ("udp_ddos_1", "udp_ddos"),
 
         # other
@@ -128,11 +128,10 @@ def convert_all_files():
                                         attack_label=attack_label)
 
 
-
 if __name__ == '__main__':
     ### do all files:
     convert_all_files()
 
     ### specific file:
-    # transform_single_attacks_to_csv(file_name="udp_ddos_0",
-    #                                 attack_label="udp_ddos")
+    # transform_single_attacks_to_csv(file_name="ping_flood_1",
+    #                                 attack_label="ping_flood")
