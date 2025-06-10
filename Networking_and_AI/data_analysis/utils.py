@@ -5,8 +5,8 @@ N_ESTIMATORS = 100
 SEQ_LENGTH = 10
 N_EPOCHS = 10
 LR = 0.001
-INPUTS = ['size', 'protocol_encoded', 'src_port', 'dst_port', 'flags']
-INPUTS_SMALL = ['size', 'protocol_encoded']
+CLASSIFICATION_INPUT_FEATURES = ['size', 'protocol_encoded', 'src_port', 'dst_port', 'flags_encoded']
+TIME_SERIES_INPUT_FEATURES = ['size', 'protocol_encoded', 'flags_encoded']
 
 def create_sequences(x, y, seq_length):
     xs, ys = [], []

@@ -37,6 +37,6 @@ def merge_csv_files_continuous(file_names: list[str], output_file_name: str):
 
 if __name__ == '__main__':
     merge_csv_files_continuous(
-        file_names=["ping_flood", "syn_flood_1", "udp_flood_1", "ping_flood", "syn_flood_2", "udp_flood_2"],
-        output_file_name="all_floods"
+        file_names=["ping_flood_1", "syn_flood_1", "fin_flood_1", "rst_flood_1", "udp_flood_1"],
+        output_file_name="all_floods_1"
     )

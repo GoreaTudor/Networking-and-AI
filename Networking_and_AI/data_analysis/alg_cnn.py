@@ -11,43 +11,44 @@ from sklearn.preprocessing import LabelEncoder
 from data_analysis.data_loader import load_training_supervised_data, \
     load_testing_supervised_data
 from data_analysis.graphs import draw_confusion_matrix
-from data_analysis.utils import create_sequences, SEQ_LENGTH, N_EPOCHS, LR
+from data_analysis.utils import create_sequences, SEQ_LENGTH, N_EPOCHS, LR, TIME_SERIES_INPUT_FEATURES
 
 
 def run_cnn(train_df: DataFrame,
             test_df: DataFrame,
+            input_features: list[str] = TIME_SERIES_INPUT_FEATURES,
             seq_len: int = SEQ_LENGTH,
             n_epochs: int = N_EPOCHS,
             lr: float = LR):
-    # remove unknown labels
+    # filter unknowns
     train_df = train_df[train_df['attack_type'] != 'unknown']
     test_df = test_df[test_df['attack_type'] != 'unknown']
 
-    # label encoding
+    # encode labels
     le_protocol = LabelEncoder()
     train_df['protocol_encoded'] = le_protocol.fit_transform(train_df['protocol'])
     test_df['protocol_encoded'] = le_protocol.transform(test_df['protocol'])
 
+    le_flags = LabelEncoder()
+    train_df['flags_encoded'] = le_flags.fit_transform(train_df['flags'])
+    test_df['flags_encoded'] = le_flags.transform(test_df['flags'])
+
     le_attack = LabelEncoder()
     train_df['attack_type_encoded'] = le_attack.fit_transform(train_df['attack_type'])
+    test_df['attack_type_encoded'] = le_attack.transform(test_df['attack_type'])
 
-    # check all test labels exist in train labels
     if not set(test_df['attack_type']).issubset(set(le_attack.classes_)):
         print("Test set contains labels not present in training set. Exiting.")
         return
-
-    test_df['attack_type_encoded'] = le_attack.transform(test_df['attack_type'])
 
     # sort by time
     train_df = train_df.sort_values('time')
     test_df = test_df.sort_values('time')
 
-    # feature selection
-    features = ['size', 'protocol_encoded']
-    train_x = train_df[features].values
+    # input and output features
+    train_x = train_df[input_features].values
     train_y = train_df['attack_type_encoded'].values
-
-    test_x = test_df[features].values
+    test_x = test_df[input_features].values
     test_y = test_df['attack_type_encoded'].values
 
     # create sequences
@@ -80,15 +81,13 @@ def run_cnn(train_df: DataFrame,
     pred_y_prob = model.predict(test_seq_x)
     pred_y = np.argmax(pred_y_prob, axis=1)
 
-    # convert numeric predictions and ground truth back to string labels
+    # decode
     test_labels_str = le_attack.inverse_transform(test_seq_y)
     pred_labels_str = le_attack.inverse_transform(pred_y)
-
-    # get only label names in the test set
     labels_in_test = np.unique(test_seq_y)
     target_names_in_test = le_attack.inverse_transform(labels_in_test)
 
-    # classification report
+    # report
     print(classification_report(
         test_labels_str,
         pred_labels_str,
@@ -96,7 +95,6 @@ def run_cnn(train_df: DataFrame,
         target_names=target_names_in_test
     ))
 
-    # confusion matrix
     draw_confusion_matrix(test_labels_str, pred_labels_str, label_names=target_names_in_test)
 
 

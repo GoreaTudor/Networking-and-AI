@@ -6,8 +6,8 @@ __CONVERTED_FILE_PREFIX = "..\\data\\converted\\"
 __MERGED_FILE_PREFIX = "..\\data\\merged\\"
 __UNKNOWN_LABEL = "unknown"
 
-__DEFAULT_TRAIN_FILE_NAME = "all_floods"
-__DEFAULT_TEST_FILE_NAME = "all_floods"
+__DEFAULT_TRAIN_FILE_NAME = "all_floods_0"
+__DEFAULT_TEST_FILE_NAME = "all_floods_0"
 
 
 def load_packets_supervised_data(file_name: str = __DEFAULT_FILE_NAME,

@@ -6,53 +6,62 @@ from sklearn.preprocessing import LabelEncoder
 from data_analysis.data_loader import load_training_supervised_data, \
     load_testing_supervised_data
 from data_analysis.graphs import draw_confusion_matrix
-from data_analysis.utils import N_ESTIMATORS, RANDOM_STATE
+from data_analysis.utils import N_ESTIMATORS, RANDOM_STATE, CLASSIFICATION_INPUT_FEATURES
 
 
 def run_random_forest(train_df: DataFrame,
                       test_df: DataFrame,
+                      input_features: list[str] = CLASSIFICATION_INPUT_FEATURES,
                       n_estimators: int = N_ESTIMATORS,
                       random_state: int = RANDOM_STATE):
-    print("Random Forest Classifier")
-
-    # Drop unknowns
+    # filter unknowns
     train_df = train_df[train_df["attack_type"] != "unknown"]
     test_df = test_df[test_df["attack_type"] != "unknown"]
 
-    # Encode protocol
+    # replace nan ports & flags with -1
+    train_df['src_port'] = train_df['src_port'].fillna(-1)
+    test_df['src_port'] = test_df['src_port'].fillna(-1)
+    train_df['dst_port'] = train_df['dst_port'].fillna(-1)
+    test_df['dst_port'] = test_df['dst_port'].fillna(-1)
+    train_df['flags'] = train_df['flags'].fillna("-")
+    test_df['flags'] = test_df['flags'].fillna("-")
+
+    # encode labels
     le_protocol = LabelEncoder()
     train_df["protocol_encoded"] = le_protocol.fit_transform(train_df["protocol"])
     test_df["protocol_encoded"] = le_protocol.transform(test_df["protocol"])
 
-    # Encode attack type
+    le_flags = LabelEncoder()
+    train_df["flags_encoded"] = le_flags.fit_transform(train_df["flags"])
+    test_df["flags_encoded"] = le_flags.transform(test_df["flags"])
+
     le_attack = LabelEncoder()
     train_df["attack_type_encoded"] = le_attack.fit_transform(train_df["attack_type"])
+    test_df["attack_type_encoded"] = le_attack.transform(test_df["attack_type"])
 
     if not set(test_df["attack_type"]).issubset(set(le_attack.classes_)):
         print("Test set contains unseen attack types.")
         return
 
-    test_df["attack_type_encoded"] = le_attack.transform(test_df["attack_type"])
-
-    # Features and labels
-    features = ["size", "protocol_encoded"]
-    train_x = train_df[features]
-    test_x = test_df[features]
+    # input and output features
+    train_x = train_df[input_features]
+    test_x = test_df[input_features]
     train_y = train_df["attack_type_encoded"]
     test_y = test_df["attack_type_encoded"]
 
-    # Train model
+    # train
     clf = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
     clf.fit(train_x, train_y)
 
-    # Predict
+    # predict
     pred_y = clf.predict(test_x)
 
-    # Decode for human-readable output
+    # decode
     test_labels_str = le_attack.inverse_transform(test_y)
     pred_labels_str = le_attack.inverse_transform(pred_y)
     labels_in_test = le_attack.inverse_transform(sorted(test_y.unique()))
 
+    # report
     print(classification_report(
         test_labels_str,
         pred_labels_str,
