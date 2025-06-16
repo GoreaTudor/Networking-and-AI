@@ -87,7 +87,7 @@ def generate_all_x():
         output_file_name="all_ddos_n"
     )
 
-    ### OTHER ###
+    ### PSCAN ###
     merge_csv_files_continuous(
         file_names=["pscan_test", "pscan_0", "pscan_1"],
         output_file_name="all_pscan"
@@ -102,6 +102,7 @@ def generate_all_x():
         output_file_name="all_pscan_n"
     )
 
+    ### R-DOS ###
     merge_csv_files_continuous(
         file_names=["reflected_dos_0", "reflected_dos_1"],
         output_file_name="all_reflected_dos"
@@ -110,6 +111,23 @@ def generate_all_x():
     merge_csv_files_continuous(
         file_names=["normal_0", "reflected_dos_0", "normal_0", "reflected_dos_1", "normal_0"],
         output_file_name="all_reflected_dos_n"
+    )
+
+    ### OTHER ###
+    merge_csv_files_continuous(
+        file_names=["pscan_test", "pscan_0", "pscan_1", "reflected_dos_0", "reflected_dos_1"],
+        output_file_name="all_other"
+    )
+
+    merge_csv_files_continuous(
+        file_names=["normal_0",
+                    "pscan_test", "normal_0",
+                    "pscan_0", "normal_0",
+                    "pscan_1", "normal_0",
+                    "reflected_dos_0", "normal_0",
+                    "reflected_dos_1", "normal_0",
+                    ],
+        output_file_name="all_other_n"
     )
 
 

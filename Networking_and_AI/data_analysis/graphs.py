@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from pandas import DataFrame
 from sklearn.metrics import confusion_matrix
 
@@ -29,17 +30,42 @@ def draw_protocol_usage_by_attack_type(df: DataFrame):
     plt.show()
 
 
-def draw_packet_size_distribution_by_attack_type(df: DataFrame):
-    plt.figure(figsize=(10, 6))
-    attack_types = df['attack_type'].unique()
-    data = [df[df['attack_type'] == at]['size'] for at in attack_types]
-    plt.boxplot(data, labels=attack_types)
-    plt.title('Packet Size Distribution by Attack Type')
-    plt.xlabel('Attack Type')
-    plt.ylabel('Packet Size')
+def draw_flag_distribution_by_attack_type(df: DataFrame):
+    flag_attack_counts = df.groupby(['flags', 'attack_type']).size().unstack(fill_value=0)
+    flag_attack_counts.plot(kind='bar', stacked=True, figsize=(10, 6), colormap='tab20')
+    plt.title('TCP Flag Distribution by Attack Type')
+    plt.xlabel('TCP Flags')
+    plt.ylabel('Count')
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
+
+def draw_src_port_distribution_by_attack_type(df: DataFrame, top_n=10):
+    top_ports = df['src_port'].value_counts().nlargest(top_n).index
+    filtered = df[df['src_port'].isin(top_ports)]
+    port_attack_counts = filtered.groupby(['src_port', 'attack_type']).size().unstack(fill_value=0)
+    port_attack_counts.plot(kind='bar', stacked=True, figsize=(10, 6), colormap='Set3')
+    plt.title(f'Top {top_n} Source Ports by Attack Type')
+    plt.xlabel('Source Port')
+    plt.ylabel('Count')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+
+def draw_dst_port_distribution_by_attack_type(df: DataFrame, top_n=10):
+    top_ports = df['dst_port'].value_counts().nlargest(top_n).index
+    filtered = df[df['dst_port'].isin(top_ports)]
+    port_attack_counts = filtered.groupby(['dst_port', 'attack_type']).size().unstack(fill_value=0)
+    port_attack_counts.plot(kind='bar', stacked=True, figsize=(10, 6), colormap='Set1')
+    plt.title(f'Top {top_n} Destination Ports by Attack Type')
+    plt.xlabel('Destination Port')
+    plt.ylabel('Count')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
 
 
 ##### PREDICTION GRAPHS #####

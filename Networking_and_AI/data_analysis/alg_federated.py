@@ -196,9 +196,9 @@ if __name__ == '__main__':
 
     run_federated(
         train_dfs=[
-            load_training_supervised_data(),
-            load_training_supervised_data(),
-            load_training_supervised_data(),
+            load_training_supervised_data(file_name="all_floods_n"),
+            load_training_supervised_data(file_name="all_ddos_n"),
+            load_training_supervised_data(file_name="all_other_n"),
         ],
         test_df=testing_df
     )
