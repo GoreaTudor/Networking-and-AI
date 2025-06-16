@@ -129,13 +129,13 @@ def generate_mixes():
     # mix 3: all SYN attacks
     merge_csv_files_continuous(
         file_names=["normal_0", "syn_flood_0", "syn_ddos_0", "normal_0", "syn_flood_1", "syn_ddos_1"],
-        output_file_name="syn_variants_mix"
+        output_file_name="mix_3"
     )
 
     # mix 4: UDP + RST
     merge_csv_files_continuous(
         file_names=["normal_0", "udp_flood_0", "rst_ddos_0", "normal_0", "udp_ddos_1", "rst_flood_1"],
-        output_file_name="udp_rst_mix"
+        output_file_name="mix_4"
     )
 
     # mix 5: all attacks light
@@ -144,7 +144,16 @@ def generate_mixes():
             "normal_0", "ping_flood_0", "syn_ddos_0", "reflected_dos_0",
             "pscan_0", "udp_flood_1", "normal_0"
         ],
-        output_file_name="all_attacks_light_mix"
+        output_file_name="mix_5"
+    )
+
+    # mix 6: all attacks heavy
+    merge_csv_files_continuous(
+        file_names=[
+            "normal_1", "ping_ddos_1", "syn_flood_1", "reflected_dos_1",
+            "pscan_1", "normal_0", "udp_ddos_1", "rst_flood_1", "normal_0"
+        ],
+        output_file_name="mix_6"
     )
 
 
@@ -176,6 +185,20 @@ def generate_testers():
             "fin_flood_1", "rst_flood_0", "udp_ddos_1"
         ],
         output_file_name="full_tester_shuffled"
+    )
+
+    # shuffled + repeats = balanced
+    merge_csv_files_continuous(
+        file_names=[
+            "normal_0", "normal_0", "ping_flood_0", "normal_0", "syn_ddos_0",
+            "reflected_dos_0", "normal_0", "pscan_1", "udp_flood_1", "normal_0",
+            "ping_ddos_1", "syn_flood_1", "normal_0", "normal_0", "fin_flood_0",
+            "rst_ddos_0", "reflected_dos_1", "ping_ddos_1", "normal_0", "pscan_0",
+            "fin_ddos_0", "normal_0", "udp_ddos_1", "syn_ddos_1", "rst_flood_1",
+            "normal_0", "ping_flood_1", "fin_ddos_1", "udp_flood_0", "normal_0",
+            "syn_flood_0", "normal_0", "rst_flood_0"
+        ],
+        output_file_name="full_tester_balanced"
     )
 
 
