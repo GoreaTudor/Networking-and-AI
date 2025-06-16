@@ -19,6 +19,7 @@ def load_packets_supervised_data(file_name: str = __DEFAULT_FILE_NAME,
 
     # Drop rows where attack_type is "unknown"
     df_cleaned = df[df["attack_type"] != __UNKNOWN_LABEL].reset_index(drop=True)
+    df_cleaned["flags"] = df_cleaned["flags"].fillna("-")
 
     return df_cleaned
 

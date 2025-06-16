@@ -62,6 +62,7 @@ def run_federated(train_dfs: list[DataFrame],
     print(f"federated training using {nr_clients} clients")
 
     # filter unknowns
+    print(f"ceeee: {test_df}")
     test_df = test_df[test_df['attack_type'] != 'unknown']
 
     # encode labels globally
