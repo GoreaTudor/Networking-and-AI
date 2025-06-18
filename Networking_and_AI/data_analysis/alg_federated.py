@@ -47,7 +47,7 @@ def __encode_attacks_globally(train_dfs):
 def __average_weights(weight_list):
     avg_weights = []
     for weights in zip(*weight_list):
-        avg_weights.append(np.mean(weights, axis=0))
+        avg_weights.append(np.average(weights, axis=0))
     return avg_weights
 
 
@@ -62,7 +62,6 @@ def run_federated(train_dfs: list[DataFrame],
     print(f"federated training using {nr_clients} clients")
 
     # filter unknowns
-    print(f"ceeee: {test_df}")
     test_df = test_df[test_df['attack_type'] != 'unknown']
 
     # encode labels globally
@@ -197,9 +196,10 @@ if __name__ == '__main__':
 
     run_federated(
         train_dfs=[
-            load_training_supervised_data(file_name="all_floods_n"),
-            load_training_supervised_data(file_name="all_ddos_n"),
-            load_training_supervised_data(file_name="all_other_n"),
+            load_training_supervised_data(file_name="client_mix_2"),
+            load_training_supervised_data(file_name="client_mix_5"),
+            load_training_supervised_data(file_name="client_mix_4"),
         ],
-        test_df=testing_df
+        test_df=testing_df,
+        n_epochs=30,
     )
